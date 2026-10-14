@@ -50,7 +50,27 @@ class ControlGastos(private val repositorio: GastoRepository) {
         return null
     }
 
-    suspend fun listar(): List<Gasto> = repositorio.listar()
+    /**
+     * Valida y, si todo esta bien, reemplaza el gasto que tiene el mismo id.
+     * Devuelve null si se actualizo, o el mensaje de error si no.
+     */
+    suspend fun actualizar(gasto: Gasto): String? {
+        val error = validar(gasto)
+        if (error != null) {
+            return error
+        }
+        if (!repositorio.actualizar(gasto)) {
+            return "No existe el gasto #${gasto.id}"
+        }
+        return null
+    }
+
+    /** Devuelve el gasto o null si no existe. */
+    suspend fun buscarPorId(id: Int): Gasto? = repositorio.buscarPorId(id)
+
+    /** Devuelve los gastos del mas reciente al mas antiguo. */
+    suspend fun listar(): List<Gasto> =
+        repositorio.listar().reversed().sortedByDescending { it.fecha }
 
     suspend fun eliminar(id: Int): Boolean = repositorio.eliminar(id)
 
